@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PantryChef — Beautiful AI Recipe Suggestion Maker</title>
+  <meta name="description" content="Manage your household pantry and let AI chef cook up spectacular recipes instantly using your available food items.">
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-theme">
+  <!-- Interactive Toast Notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Background Glowing Blobs -->
+  <div class="glow-blob blob-1"></div>
+  <div class="glow-blob blob-2"></div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-logo-container">
+      <div class="logo-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="logo-svg">
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          <path d="M12 2v20"></path>
+          <path d="M4 12h16"></path>
+          <path d="M16 8H8"></path>
+          <path d="M16 16H8"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="logo-text">Pantry<span>Chef</span></h1>
+        <p class="logo-subtitle">Your Intelligent Culinary Assistant</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- API Key Status Indicator -->
+      <div id="api-status-badge" class="api-status-badge unauthorized">
+        <span class="badge-dot"></span>
+        <span class="badge-text">API Key Missing</span>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button id="theme-toggle-btn" class="icon-btn theme-btn" aria-label="Toggle Theme">
+        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+      </button>
+
+      <!-- Settings Button (Gear) -->
+      <button id="settings-open-btn" class="icon-btn settings-btn" aria-label="Open Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Main Content Grid -->
+  <main class="app-main-grid">
+    
+    <!-- LEFT SIDEBAR: Pantry Manager -->
+    <section class="pantry-panel card-panel">
+      <div class="panel-header">
+        <div class="panel-title-wrapper">
+          <svg class="panel-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg>
+          <h2>My Kitchen Pantry</h2>
+        </div>
+        <button id="pantry-clear-btn" class="text-btn danger-text hidden">Clear All</button>
+      </div>
+
+      <!-- Add New Item Form -->
+      <form id="add-pantry-form" class="add-pantry-form">
+        <div class="form-row main-row">
+          <div class="input-wrapper text-input">
+            <input type="text" id="item-name-input" placeholder="e.g., Fresh Tomato, Chicken breast..." required autocomplete="off">
+            <label for="item-name-input">Food Item Name</label>
+          </div>
+          
+          <button type="submit" class="add-item-btn" aria-label="Add Item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+          </button>
+        </div>
+
+        <div class="form-row expandable-fields">
+          <!-- Quantity and Unit -->
+          <div class="qty-unit-group">
+            <div class="input-wrapper qty-input">
+              <input type="number" id="item-qty-input" min="0.1" step="any" value="1">
+              <label for="item-qty-input">Qty</label>
+            </div>
+            <div class="input-wrapper unit-select">
+              <select id="item-unit-input">
+                <option value="pcs">pcs</option>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+                <option value="ml">ml</option>
+                <option value="l">L</option>
+                <option value="cups">cups</option>
+                <option value="tbsp">tbsp</option>
+                <option value="units" selected>units</option>
+              </select>
+              <label for="item-unit-input">Unit</label>
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="input-wrapper category-select">
+            <select id="item-category-input">
+              <option value="Vegetables" selected>🥦 Vegetables</option>
+              <option value="Fruits">🍎 Fruits</option>
+              <option value="Proteins">🥩 Proteins & Meat</option>
+              <option value="Dairy">🥛 Dairy & Cheese</option>
+              <option value="Grains">🌾 Grains & Baking</option>
+              <option value="Spices">🌶️ Spices & Condiments</option>
+              <option value="Others">📦 General / Other</option>
+            </select>
+            <label for="item-category-input">Category</label>
+          </div>
+        </div>
+      </form>
+
+      <!-- Quick Add Staples Panel -->
+      <div class="quick-staples">
+        <h3>Quick-Add Staples</h3>
+        <div class="staples-scroll">
+          <button type="button" class="staple-chip" data-name="Egg" data-category="Proteins" data-unit="pcs" data-qty="6">🥚 Eggs</button>
+          <button type="button" class="staple-chip" data-name="Tomato" data-category="Vegetables" data-unit="pcs" data-qty="3">🍅 Tomatoes</button>
+          <button type="button" class="staple-chip" data-name="Milk" data-category="Dairy" data-unit="ml" data-qty="500">🥛 Milk</button>
+          <button type="button" class="staple-chip" data-name="Onion" data-category="Vegetables" data-unit="pcs" data-qty="2">🧅 Onions</button>
+          <button type="button" class="staple-chip" data-name="Chicken Breast" data-category="Proteins" data-unit="g" data-qty="500">🍗 Chicken</button>
+          <button type="button" class="staple-chip" data-name="Potato" data-category="Vegetables" data-unit="pcs" data-qty="4">🥔 Potatoes</button>
+          <button type="button" class="staple-chip" data-name="Pasta" data-category="Grains" data-unit="g" data-qty="250">🍝 Pasta</button>
+          <button type="button" class="staple-chip" data-name="Garlic" data-category="Spices" data-unit="pcs" data-qty="1">🧄 Garlic</button>
+          <button type="button" class="staple-chip" data-name="Cheese" data-category="Dairy" data-unit="g" data-qty="150">🧀 Cheese</button>
+        </div>
+      </div>
+
+      <!-- Pantry List Categories Filter -->
+      <div class="pantry-tabs-container">
+        <div class="pantry-tabs">
+          <button type="button" class="pantry-tab active" data-filter="all">All</button>
+          <button type="button" class="pantry-tab" data-filter="Vegetables">🥦 Veggies</button>
+          <button type="button" class="pantry-tab" data-filter="Proteins">🥩 Protein</button>
+          <button type="button" class="pantry-tab" data-filter="Dairy">🥛 Dairy</button>
+          <button type="button" class="pantry-tab" data-filter="Grains">🌾 Grains</button>
+        </div>
+      </div>
+
+      <!-- Pantry List Container -->
+      <div class="pantry-list-container">
+        <div id="pantry-empty-state" class="pantry-empty-state">
+          <div class="empty-icon-box">🍳</div>
+          <h3>Your pantry is empty!</h3>
+          <p>Add the ingredients you currently have in your fridge or shelves using the form above or click our Quick-Add Staples to get started.</p>
+        </div>
+        <ul id="pantry-list" class="pantry-list">
+          <!-- Dynamic Items will be rendered here -->
+        </ul>
+      </div>
+
+      <div class="pantry-footer">
+        <span id="pantry-counter" class="pantry-counter">0 items available</span>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: AI Chef & Recipe Suggestion Board -->
+    <section class="recipe-panel card-panel">
+      
+      <!-- Preference Controls Bar -->
+      <div class="preferences-bar">
+        <div class="pref-column">
+          <label for="pref-meal-type">Meal Type</label>
+          <select id="pref-meal-type" class="pref-select">
+            <option value="Any Meal">🍽️ Any Meal</option>
+            <option value="Breakfast">🍳 Breakfast</option>
+            <option value="Lunch">🥗 Lunch</option>
+            <option value="Dinner">🥩 Dinner</option>
+            <option value="Snack">🧁 Snack</option>
+          </select>
+        </div>
+
+        <div class="pref-column">
+          <label for="pref-cooking-time">Max Cooking Time</label>
+          <select id="pref-cooking-time" class="pref-select">
+            <option value="No Limit">⚡ No Limit</option>
+            <option value="15 minutes">⏰ Under 15m</option>
+            <option value="30 minutes">⏰ Under 30m</option>
+            <option value="45 minutes">⏰ Under 45m</option>
+            <option value="60 minutes">⏰ Under 1h</option>
+          </select>
+        </div>
+
+        <div class="pref-column">
+          <label for="pref-diet">Dietary Preferences</label>
+          <select id="pref-diet" class="pref-select">
+            <option value="None">🥗 No Preference</option>
+            <option value="Vegetarian">🌱 Vegetarian</option>
+            <option value="Vegan">🍀 Vegan</option>
+            <option value="Gluten-Free">🌾 Gluten-Free</option>
+            <option value="Keto">🥩 Low-Carb / Keto</option>
+          </select>
+        </div>
+
+        <div class="pref-column">
+          <label for="pref-strictness">Pantry Strictness</label>
+          <select id="pref-strictness" class="pref-select">
+            <option value="Staples Allowed" selected>🧂 Staples Allowed (oil/salt)</option>
+            <option value="Strict Pantry Only">🔒 Strict (Pantry Only)</option>
+            <option value="Include 1-2 Extras">🛒 OK to purchase 1-2 items</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Area: Magic Suggestion Button -->
+      <div class="suggestion-action-area">
+        <button id="generate-recipes-btn" class="glow-primary-btn">
+          <span class="btn-shine"></span>
+          <svg class="cook-btn-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          <span class="btn-label">Cook Up AI Recipes</span>
+        </button>
+      </div>
+
+      <!-- Display Grid for Recipe Cards -->
+      <div class="recipes-display-board">
+        
+        <!-- Welcome Splash Screen -->
+        <div id="recipe-welcome-state" class="recipe-welcome-state">
+          <div class="splash-graphic-box">
+            <svg class="splash-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 70 A 30 30 0 0 1 80 70 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <path d="M20 70 L 80 70" stroke="currentColor" stroke-width="3"/>
+              <circle cx="50" cy="40" r="8" fill="var(--accent-orange)"/>
+              <path d="M45 20 C 45 10, 55 10, 55 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <path d="M35 22 C 35 15, 42 15, 42 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <path d="M60 22 C 60 15, 67 15, 67 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <h2>What shall we cook today?</h2>
+          <p class="splash-text">
+            Add ingredients to your pantry, configure your recipe preferences, and hit <strong>Cook Up AI Recipes</strong>.
+            PantryChef will craft culinary recipes customized exclusively for the items in your household!
+          </p>
+          <div class="key-reminder-box hidden" id="splash-key-warning">
+            <svg class="warning-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span>Please configure your <strong>Gemini API Key</strong> in the settings panel above to unlock AI recipes!</span>
+          </div>
+        </div>
+
+        <!-- Animated Loading Cooking Screen -->
+        <div id="recipe-loading-state" class="recipe-loading-state hidden">
+          <div class="pot-animation-wrapper">
+            <div class="steam steam-1">~</div>
+            <div class="steam steam-2">~</div>
+            <div class="steam steam-3">~</div>
+            <div class="cooking-pot">
+              <div class="pot-lid"></div>
+              <div class="pot-body">
+                <div class="pot-handle handle-l"></div>
+                <div class="pot-handle handle-r"></div>
+              </div>
+              <div class="cooking-fire">
+                <span class="flame flame-1"></span>
+                <span class="flame flame-2"></span>
+                <span class="flame flame-3"></span>
+              </div>
+            </div>
+          </div>
+          <h3 id="loading-status-title">Whipping up delicious ideas...</h3>
+          <p id="loading-status-subtitle">Consulting Michelin-starred AI databases...</p>
+        </div>
+
+        <!-- Error Panel -->
+        <div id="recipe-error-state" class="recipe-error-state hidden">
+          <div class="error-emoji">💥</div>
+          <h3 id="error-title">Culinary Hiccup!</h3>
+          <p id="error-message">We couldn't connect with the AI chef. Please check your internet connection or verify your API key in settings.</p>
+          <button id="error-retry-btn" class="glow-primary-btn text-only">Try Again</button>
+        </div>
+
+        <!-- Recipe Grid Result Container -->
+        <div id="recipes-grid" class="recipes-grid hidden">
+          <!-- Dynamic Recipe Cards will be inserted here -->
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: Settings & API Configuration -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal-container settings-modal-box">
+      <button class="modal-close-btn" id="settings-close-btn" aria-label="Close Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      
+      <div class="modal-header">
+        <div class="modal-logo-wrapper">🔑</div>
+        <h2>AI Integration Panel</h2>
+        <p>PantryChef accesses Gemini AI to inspect pantry ingredients and curate real-time recipes.</p>
+      </div>
+
+      <div class="modal-content">
+        <form id="settings-form">
+          <div class="input-wrapper text-input secure-input">
+            <input type="password" id="api-key-input" placeholder="AIzaSy..." required autocomplete="off">
+            <label for="api-key-input">Gemini API Key</label>
+            <button type="button" id="toggle-key-visibility" class="toggle-password-btn" aria-label="Toggle Password Visibility">
+              <svg class="eye-open" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg class="eye-closed hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" y1="2" x2="22" y2="22"></line></svg>
+            </button>
+          </div>
+          
+          <div class="info-guide-box">
+            <p><strong>💡 How to acquire a FREE Gemini Key:</strong></p>
+            <ol>
+              <li>Go to the <a href="https://aistudio.google.com/" target="_blank" rel="noopener">Google AI Studio <svg class="external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> website.</li>
+              <li>Sign in with your Google account.</li>
+              <li>Click the prominent blue <strong>Get API key</strong> button at the top left.</li>
+              <li>Generate a new key and copy-paste it into the field above!</li>
+            </ol>
+          </div>
+
+          <div class="security-disclaimer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="disclaimer-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Your key is stored 100% locally in your browser's private storage. We have no external backend and never transmit your API key anywhere other than direct, secure requests to Google's official Gemini endpoint.</span>
+          </div>
+
+          <div class="settings-modal-actions">
+            <button type="button" class="outline-btn" id="settings-clear-api-btn">Delete Key</button>
+            <button type="submit" class="glow-primary-btn">Save Configuration</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Detailed Recipe Reader -->
+  <div id="recipe-modal" class="modal-overlay hidden">
+    <div class="modal-container recipe-modal-box">
+      <!-- Top banner image (styled via CSS gradient background & placeholder logo) -->
+      <div class="recipe-banner">
+        <div class="recipe-banner-overlay"></div>
+        <button class="modal-close-btn light-overlay" id="recipe-close-btn" aria-label="Close Recipe">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <span class="recipe-banner-tag" id="modal-recipe-difficulty">Easy</span>
+        <h2 id="modal-recipe-title" class="banner-title">Slow-Cooked Tuscan Spaghetti</h2>
+      </div>
+
+      <!-- Quick Nutrition & Time Stats Bar -->
+      <div class="recipe-quick-stats">
+        <div class="quick-stat-item">
+          <span class="stat-icon">🕒</span>
+          <div class="stat-meta">
+            <span class="stat-value" id="modal-recipe-time">25m</span>
+            <span class="stat-lbl">Cooking Time</span>
+          </div>
+        </div>
+        <div class="quick-stat-item">
+          <span class="stat-icon">👥</span>
+          <div class="stat-meta">
+            <span class="stat-value" id="modal-recipe-servings">2</span>
+            <span class="stat-lbl">Servings</span>
+          </div>
+        </div>
+        <div class="quick-stat-item">
+          <span class="stat-icon">🔥</span>
+          <div class="stat-meta">
+            <span class="stat-value" id="modal-recipe-calories">410 kcal</span>
+            <span class="stat-lbl">Est. Calories</span>
+          </div>
+        </div>
+        <div class="quick-stat-item">
+          <span class="stat-icon">🧩</span>
+          <div class="stat-meta">
+            <span class="stat-value" id="modal-recipe-match">100%</span>
+            <span class="stat-lbl">Ingredient Match</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body-split">
+        <!-- LEFT COLUMN: Dynamic Ingredients List -->
+        <aside class="modal-recipe-sidebar">
+          <h3>Required Ingredients</h3>
+          <p class="section-intro">Cross-referenced with what's in your house:</p>
+          
+          <div class="ingredient-block-group">
+            <h4 class="ing-group-title in-stock">🛒 Available in Pantry</h4>
+            <ul id="modal-ing-instock" class="modal-ingredient-list">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+
+          <div class="ingredient-block-group">
+            <h4 class="ing-group-title staple">🧂 Standard Kitchen Staples</h4>
+            <ul id="modal-ing-staples" class="modal-ingredient-list">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+
+          <div class="ingredient-block-group" id="modal-missing-block">
+            <h4 class="ing-group-title missing">❌ Missing Ingredients</h4>
+            <ul id="modal-ing-missing" class="modal-ingredient-list">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+        </aside>
+
+        <!-- RIGHT COLUMN: Step-by-Step Cooking Steps -->
+        <div class="modal-recipe-main">
+          <h3>Preparation & Instructions</h3>
+          <p class="section-intro">Tick each step off as you execute the cooking process:</p>
+          
+          <ol id="modal-recipe-steps" class="interactive-steps-list">
+            <!-- Dynamically populated steps with checkable lists -->
+          </ol>
+
+          <!-- Pro Tip Box -->
+          <div class="pro-tip-container">
+            <div class="pro-tip-header">
+              <span class="chef-hat-icon">👨‍🍳</span>
+              <h4>Chef's Secret Tip</h4>
+            </div>
+            <p id="modal-recipe-tip" class="pro-tip-text">To elevate the aroma, toast your dry herbs in a hot dry skillet for 30 seconds before incorporating them into the tomato paste.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Panel -->
+      <div class="modal-footer">
+        <div class="footer-checkbox-wrapper">
+          <label class="deduct-checkbox-label">
+            <input type="checkbox" id="deduct-pantry-checkbox" checked>
+            <span class="custom-checkbox"></span>
+            Deduct used items from pantry on completion
+          </label>
+        </div>
+        <div class="footer-action-buttons">
+          <button id="recipe-print-btn" class="outline-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print Recipe
+          </button>
+          <button id="recipe-complete-btn" class="glow-primary-btn">
+            🎉 Done, I Cooked This!
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
